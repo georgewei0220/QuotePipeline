@@ -1,0 +1,57 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "MyQuotes",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build MyQuotes",
+      "program": "${workspaceFolder}/MyQuotes/bin/Debug/net10.0/MyQuotes.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/MyQuotes",
+      "console": "integratedTerminal",
+      "stopAtEntry": false
+    },
+    {
+      "name": "race",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/QuotePipeline/bin/Debug/net10.0/QuotePipeline.dll",
+      "args": ["race"],
+      "cwd": "${workspaceFolder}/src/QuotePipeline",
+      "console": "integratedTerminal",
+      "stopAtEntry": false
+    },
+    {
+      "name": "sim (預設)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/QuotePipeline/bin/Debug/net10.0/QuotePipeline.dll",
+      "args": ["sim", "--rate", "200000", "--seconds", "5"],
+      "cwd": "${workspaceFolder}/src/QuotePipeline",
+      "console": "integratedTerminal",
+      "stopAtEntry": false
+    },
+    {
+      "name": "自訂參數 (啟動時輸入)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/QuotePipeline/bin/Debug/net10.0/QuotePipeline.dll",
+      "args": "${input:cliArgs}",
+      "cwd": "${workspaceFolder}/src/QuotePipeline",
+      "console": "integratedTerminal",
+      "stopAtEntry": false
+    }
+  ],
+  "inputs": [
+    {
+      "id": "cliArgs",
+      "type": "promptString",
+      "description": "命令列參數",
+      "default": "sim --rate 100000 --seconds 3"
+    }
+  ]
+}
