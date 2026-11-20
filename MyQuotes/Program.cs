@@ -1,27 +1,32 @@
 ﻿using System.Diagnostics;
+
 Console.WriteLine("行情模擬器啟動");
+var sink = new ChannelSink();
+//var sink = new PrintingSink();
+SimulatorSource simulator = new SimulatorSource(1_000_000, 5, sink); 
 
-const int Rate = 200_000_000;   // 目標速率:每秒幾筆
-const int Seconds = 2;      // 跑幾秒
-long sent = 0;
-var sink = new CountingSink();
-var sw = Stopwatch.StartNew();
-
-while (sw.Elapsed.TotalSeconds < Seconds)
+// 消費者:故意很慢,每處理一筆睡 1 毫秒ß
+var consumer = Task.Run(async () =>
 {
-    long due = (long)(sw.Elapsed.TotalSeconds * Rate);
-    while (sent < due)
+    await foreach (var q in sink.Reader.ReadAllAsync())
     {
-        sink.Publish(new Quote(sent, 10000, 5));
-        //Console.WriteLine($"已過 {sw.Elapsed.TotalSeconds:F3} 秒,應送累計 {due},現在送第 {sent} 筆");
-        sent++;
+       Thread.Sleep(1); 
     }
-    Thread.Sleep(1);
-}
+});
 
-sw.Stop();
-double rate = sink.Count / sw.Elapsed.TotalSeconds;
-Console.WriteLine($"目標 {Rate:N0} 筆/秒,實際收到 {sink.Count:N0} 筆,速率 {rate:N0} 筆/秒");
+// 監視器:每秒印出佇列積壓幾筆、記憶體用了多少
+var monitor = Task.Run(async () =>
+{
+    while (true)
+    {
+        await Task.Delay(1000);
+        Console.WriteLine($"佇列積壓 {sink.Reader.Count:N0} 筆,記憶體 {GC.GetTotalMemory(false) / 1024 / 1024} MB");
+    }
+});
 
-public readonly record struct Quote(long Seq, int Price, int Qty);
 
+simulator.Run();
+Console.WriteLine($"生產結束,佇列還積壓 {sink.Reader.Count:N0} 筆");
+
+//Console.WriteLine($"收到 {sink.Count:N0} 筆,速率 {sink.Count / sw.Elapsed.TotalSeconds:N0} 筆/秒");
+//RaceExperiment.Run();
