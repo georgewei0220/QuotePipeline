@@ -21,7 +21,7 @@ public class SimulatorSource
         while (sw.Elapsed.TotalSeconds < _seconds)
         {
             long due = (long)(sw.Elapsed.TotalSeconds * _rate);
-            while (sent < due)
+            while (sent < due && sw.Elapsed.TotalSeconds < _seconds)
             {
                 _sink.Publish(new Quote(sent, 10000, 5));
                 sent++;
